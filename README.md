@@ -45,6 +45,7 @@
    <ul>
       <li>This is an attempt at unlocking the framerate and it is by any means perfect</li>
       <li>The recommended framerate to play is 60fps. At higher framerates vehicle sounds, quick-time events and bullet aim get messed up</li>
+      <li>Is recommended to lock the framerate to 60, 120, 144, 165, 240 or 360 using the method provided here. Avoid using any other third party software for that matter</li>
       <li>Glitches appear during in-game cutscenes if the frametime is not stable. Playing in fullscreen is recommended</li>
       <li>Is recommended to set Vertical Sync to ON inside your NVIDIA Control Panel to avoid glitches during cutscenes</li>
       <li>Is recommended to set Power Managment Mode to Prefer Maximum Performance for more stable framerates</li>
