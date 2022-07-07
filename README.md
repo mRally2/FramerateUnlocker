@@ -8,7 +8,7 @@
    <hr>
    <ul>
       <li>Framerate unlock during all Story Mode cutscenes, menus and garage. <em>Special thanks to Brawltendo</em></li>
-      <li>Lock the framerate to 60, 120, 144, 165, 240 or 360. Comes unlocked by default</li>
+      <li>Lock the framerate to 60, 120, 144, 165, 240 or 360</li>
       <li>Toggle the rendering of the vehicles inside the Main Menu garage like they were displayed in the demo version<br></li>
    </ul>
    <p><br></p>
@@ -17,14 +17,14 @@
    <ul>
       <li>Open the game before using the tool</li>
       <li>Enable it by pressing F5 preferably before the PRESS ENTER screen</li>
-      <li>Use F6 to toggle the rendering of the vehicles in the garage</li>
+      <li>Use F6 to toggle the rendering of the vehicles in the garage. Comes enabled by default</li>
       <li>Use NUMPAD 7 to lock the framerate to 60fps</li>
       <li>Use NUMPAD 8 to lock the framerate to 120fps</li>
       <li>Use NUMPAD 9 to lock the framerate to 144fps</li>
       <li>Use NUMPAD 4 to lock the framerate to 165fps</li>
       <li>Use NUMPAD 5 to lock the framerate to 240fps</li>
       <li>Use NUMPAD 6 to lock the framerate to 360fps</li>
-      <li>Use NUMPAD 1 to unlock the framerate</li>
+      <li>Use NUMPAD 1 to unlock the framerate. Comes unlocked by default</li>
    </ul>
    <p><br></p>
    <p><strong>KNOWN ISSUES</strong></p>
