@@ -1,0 +1,1270 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CheatTable CheatEngineTableVersion="38">
+  <CheatEntries>
+    <CheatEntry>
+      <ID>1008</ID>
+      <Description>"FRAMERATE UNLOCKER"</Description>
+      <Options moActivateChildrenAsWell="1"/>
+      <LastState Value="" RealAddress="00000000"/>
+      <GroupHeader>1</GroupHeader>
+      <Hotkeys>
+        <Hotkey>
+          <Action>Activate</Action>
+          <Keys>
+            <Key>116</Key>
+          </Keys>
+          <ID>0</ID>
+        </Hotkey>
+      </Hotkeys>
+      <CheatEntries>
+        <CheatEntry>
+          <ID>1001</ID>
+          <Description>"Cutscene Framerate Unlocker"</Description>
+          <LastState/>
+          <VariableType>Auto Assembler Script</VariableType>
+          <AssemblerScript>{$lua}
+eventCountPast = 0
+eventCountPresent = 0
+isInNISCutscene = 0
+addresslist = getAddressList()
+CheatEntry = addresslist_getMemoryRecordByDescription(addresslist,[[VSync]])
+[ENABLE]
+function eventWatch()
+    --WE SET THIS TO 1 BY DEFAULT FOR THE GARAGE AND FRONT-END MENUS
+    if readInteger("[storyEvent]") == nil and readInteger(getAddress("[storyEvent]")-0x64) ~= 1599632309 then
+        writeInteger("[varSimTick]",1)
+    end
+    --CHECK IF THE PLAYER IS IN THE PAUSE MENU
+    if readInteger("[pauseMenu]") == 1 then
+        writeInteger("[varSimTick]",1)
+    else
+        writeInteger("[varSimTick]",0) --WE PUT IT BACK TO 0 SINCE THE PLAYER UNPAUSED THE GAME
+    end
+    --CHECK IF THE PLAYER HAS CROSSED THE FINISH LINE OR IS IN TAKEDOWN CUTSCENE
+    if readInteger("02790098") == 0 and readInteger("02753F00") == 1 and
+        readInteger(getAddress("[storyEvent]")-0x64) ~= 2641126162 and
+        readInteger(getAddress("[storyEvent]")-0x64) ~= 1130647398 and
+        readInteger(getAddress("[storyEvent]")-0x64) ~= 1177725796 then --WE SKIP SANFRAN ESCAPE, CHICAGO DOWNTOWN MINI HELI CHASE, NEW YORK FINAL RACE
+        writeInteger("[varSimTick]",1)
+        if readInteger("[[[[[[02A858B0]+88]+38]+D0]+14C]+8]+AE2") ~= nil then
+            if readInteger("[[[[[[02A858B0]+88]+38]+D0]+14C]+8]+AE2") == 1 or readByte("[isDriving]") == 1 then
+                writeInteger("[[[[[[02A858B0]+88]+38]+D0]+14C]+8]+AEB",0) --WE PREVENT THE AI TO HIT THE BRAKES AFTER GETTING A TRACK RESET
+            else
+                writeInteger("[[[[[[02A858B0]+88]+38]+D0]+14C]+8]+AEB",1) --AI HITS THE BRAKES
+            end
+        end
+    end
+    --WE PREVENT THE AI FROM HITTING THE BREAKS RIGHT AFTER THE EVENT STARTED
+    if readByte("[isDriving]") == 1 then
+       writeInteger("[[[[[[02A858B0]+88]+38]+D0]+14C]+8]+AEB",0)
+    end
+    --CHECK IF THE PLAYER HAS BEEN WRECKED OR WASTED
+    if readInteger("02790098") == 1 or readInteger("02753F00") == 1 then
+        if isInNISCutscene == 0 then --NOT TO INTERFERE WITH THE VSYNC DISABLING SCRIPT
+            writeInteger("[varSimTick]",1)
+        end
+    end
+    --CHECK IF THE STORY MODE EVENT GETS RESET
+    if readInteger("[[[[[[02A858B0]+88]+38]+D0]+14C]+8]+AEB") == nil then
+        eventCountPast = 0
+        eventCountPresent = 0
+        isInNISCutscene = 0
+    end
+    if readInteger("[pauseMenu]") == 0 and readInteger("02790098") == 0 then --WE SKIP THE TIMES THE PLAYER HAS ACCESS THE PAUSE MENU &amp; IF HE HAS BEEN WASTED BY GUNFIRE OR HIS CAR IS WRECKED
+        --STORY MODE EVENTS THAT HAVE A CUTSCENE SEQUENCE
+        if readInteger(getAddress("[storyEvent]")-0x64) == 2671717031 then --Car Crusher
+
+            if readByte("[isDriving]") == 0 and eventCountPast == eventCountPresent then
+            print("[CAR CRUSHER] isDriving IS 0 &amp; PAST AND PRESENT ARE EQUAL")
+            eventCountPresent = eventCountPresent + 1 --FOR EVERY TIME YOU ENTER A CUSTSCENE
+            print("[CAR CRUSHER] PAST: ",eventCountPast," PRESENT: ",eventCountPresent)
+            end
+            if readByte("[isDriving]") == 0 and eventCountPast == 0 and eventCountPresent == 1 then --CAR CRUSHER ESCAPE
+            print("WE ARE IN CAR CRUSHER CUTSCENE AND PAST IS: ",eventCountPast," AND PRESENT IS: ",eventCountPresent)
+            eventCountPast = eventCountPresent
+            writeInteger("[varSimTick]",1)
+            end
+        elseif readInteger(getAddress("[storyEvent]")-0x64) == 180346758 then  --New Jersey Junkward
+
+            if readByte("[isDriving]") == 0 and eventCountPast == eventCountPresent then
+            print("[NEW JERSEY JUNKWARD] isDriving IS 0 &amp; PAST AND PRESENT ARE EQUAL")
+            eventCountPresent = eventCountPresent + 1 --FOR EVERY TIME YOU ENTER A CUSTSCENE
+            print("[NEW JERSEY JUNKWARD] PAST: ",eventCountPast," PRESENT: ",eventCountPresent)
+            end
+            if readByte("[isDriving]") == 1 and eventCountPast == 0 and eventCountPresent == 1 then --GET TO DRIVE THE RS4
+            print("WE EXIT ARE YOU READY CUTSCENE AND PAST IS: ",eventCountPast," AND PRESENT IS: ",eventCountPresent)
+            eventCountPast = eventCountPresent
+            writeInteger("[varSimTick]",0)
+            elseif readByte("[isDriving]") == 0 and eventCountPast == 1 and eventCountPresent == 2 then --TRAIN CUTSCENE
+            print("WE ENTER 250 CUTSCENE AND PAST IS: ",eventCountPast," AND PRESENT IS: ",eventCountPresent)
+            eventCountPast = eventCountPresent
+            writeInteger("[varSimTick]",1)
+            end
+        elseif readInteger(getAddress("[storyEvent]")-0x64) == 2702358496 then --Get Outta San Francisco
+
+            if readByte("[isDriving]") == 0 and eventCountPast == eventCountPresent then
+            print("[SAN FRANCISCO ESCAPE] isDriving IS 0 &amp; PAST AND PRESENT ARE EQUAL")
+            eventCountPresent = eventCountPresent + 1 --FOR EVERY TIME YOU ENTER A CUSTSCENE
+            print("[SAN FRANCISCO ESCAPE] PAST: ",eventCountPast," PRESENT: ",eventCountPresent)
+            end
+            if readByte("[isDriving]") == 1 and eventCountPast == 0 and eventCountPresent == 1 then
+            print("WE EXIT ARE YOU READY CUTSCENE AND PAST IS: ",eventCountPast," AND PRESENT IS: ",eventCountPresent)
+            eventCountPast = eventCountPresent
+            writeInteger("[varSimTick]",0)
+            elseif readByte("[isDriving]") == 0 and eventCountPast == 1 and eventCountPresent == 2 and readInteger(getAddress(readInteger("[sequenceHook_2]"))+0x2B) == 1701011794 then --WE DISABLE VSYNC FOR THE JUMP CUTSCENE
+            print("WE ENTER 250 CUTSCENE AND PAST IS: ",eventCountPast," AND PRESENT IS: ",eventCountPresent)
+            isInNISCutscene = 1
+            eventCountPast = eventCountPresent
+            writeInteger("[varSimTick]",0)
+            memoryrecord_freeze(CheatEntry)
+            elseif readByte("[isDriving]") == 1 and eventCountPast == 2 and eventCountPresent == 3 then --JUMP CUTSCENE ENDS
+            print("WE EXIT 250 CUTSCENE AND PAST IS: ",eventCountPast," AND PRESENT IS: ",eventCountPresent)
+            isInNISCutscene = 0
+            eventCountPast = eventCountPresent
+            memoryrecord_unfreeze(CheatEntry)
+            elseif readByte("[isDriving]") == 0 and eventCountPast == 3 and eventCountPresent == 4 and readInteger(getAddress(readInteger("[sequenceHook_1]"))+0x2D) == 892362563 then --BRIDGE JUMP
+            print("WE ENTER JUMP CUTSCENE AND PAST IS: ",eventCountPast," AND PRESENT IS: ",eventCountPresent)
+            writeInteger("[varSimTick]",1)
+            eventCountPast = eventCountPresent
+            end
+        elseif readInteger(getAddress("[storyEvent]")-0x64) == 1170798514 then --Altamont Pass
+
+            if readByte("[isDriving]") == 0 and eventCountPast == eventCountPresent then
+            print("[ALTAMONT PASS] isDriving IS 0 &amp; PAST AND PRESENT ARE EQUAL")
+            eventCountPresent = eventCountPresent + 1 --FOR EVERY TIME YOU ENTER A CUSTSCENE
+            print("[ALTAMONT PASS] PAST: ",eventCountPast," PRESENT: ",eventCountPresent)
+            end
+            if readByte("[isDriving]") == 1 and eventCountPast == 0 and eventCountPresent == 1 then --GET TO DRIVE AFTER CUTSCENE
+            print("WE EXIT ARE YOU READY CUTSCENE AND PAST IS: ",eventCountPast," AND PRESENT IS: ",eventCountPresent)
+            eventCountPast = eventCountPresent
+            writeInteger("[varSimTick]",0)
+            end
+        elseif readInteger(getAddress("[storyEvent]")-0x64) == 1599632309 then --Yosemite South B
+
+            if readByte("[isDriving]") == 0 and eventCountPast == eventCountPresent then
+            print("[YOSEMITE SOUTH B] isDriving IS 0 &amp; PAST AND PRESENT ARE EQUAL")
+            eventCountPresent = eventCountPresent + 1 --FOR EVERY TIME YOU ENTER A CUSTSCENE
+            print("[YOSEMITE SOUTH B] PAST: ",eventCountPast," PRESENT: ",eventCountPresent)
+            isInNISCutscene = 1
+            writeInteger("[varSimTick]",0)
+            memoryrecord_freeze(CheatEntry)
+            end
+            if readByte("[isDriving]") == 1 and eventCountPast == 0 and eventCountPresent == 1 then --GET TO DRIVE AFTER CUTSCENE
+            print("WE EXIT ARE YOU READY CUTSCENE AND PAST IS: ",eventCountPast," AND PRESENT IS: ",eventCountPresent)
+            eventCountPast = eventCountPresent
+            isInNISCutscene = 0
+            memoryrecord_unfreeze(CheatEntry)
+            writeInteger("[varSimTick]",0)
+            end
+        elseif readInteger(getAddress("[storyEvent]")-0x64) == 536243661 then --Sierra Pass B
+
+            if readByte("[isDriving]") == 0 and eventCountPast == eventCountPresent then
+            print("isDriving IS 0 &amp; PAST AND PRESENT ARE EQUAL")
+            eventCountPresent = eventCountPresent + 1 --FOR EVERY TIME YOU ENTER A CUSTSCENE
+            print("PAST: ",eventCountPast," PRESENT: ",eventCountPresent)
+            end
+            if readByte("[isDriving]") == 1 and eventCountPast == 0 and eventCountPresent == 1 then --GET TO DRIVE AFTER CUTSCENE
+            print("WE EXIT ARE YOU READY CUTSCENE AND PAST IS: ",eventCountPast," AND PRESENT IS: ",eventCountPresent)
+            eventCountPast = eventCountPresent
+            writeInteger("[varSimTick]",0)
+            end
+        elseif readInteger(getAddress("[storyEvent]")-0x64) == 1836275362 then --Desert Hills
+
+            if readByte("[isDriving]") == 0 and eventCountPast == eventCountPresent then
+            print("isDriving IS 0 &amp; PAST AND PRESENT ARE EQUAL")
+            eventCountPresent = eventCountPresent + 1 --FOR EVERY TIME YOU ENTER A CUSTSCENE
+            print("PAST: ",eventCountPast," PRESENT: ",eventCountPresent)
+            end
+            if readByte("[isDriving]") == 1 and eventCountPast == 0 and eventCountPresent == 1 then --GET TO DRIVE AFTER CUTSCENE
+            print("WE EXIT ARE YOU READY CUTSCENE AND PAST IS: ",eventCountPast," AND PRESENT IS: ",eventCountPresent)
+            eventCountPast = eventCountPresent
+            writeInteger("[varSimTick]",0)
+            end
+        elseif readInteger(getAddress("[storyEvent]")-0x64) == 3308825217 then --Death Valley B
+
+            if readByte("[isDriving]") == 0 and eventCountPast == eventCountPresent then
+            print("isDriving IS 0 &amp; PAST AND PRESENT ARE EQUAL")
+            eventCountPresent = eventCountPresent + 1 --FOR EVERY TIME YOU ENTER A CUSTSCENE
+            print("PAST: ",eventCountPast," PRESENT: ",eventCountPresent)
+            end
+            if readByte("[isDriving]") == 1 and eventCountPast == 0 and eventCountPresent == 1 then
+            print("WE EXIT ARE YOU READY CUTSCENE AND PAST IS: ",eventCountPast," AND PRESENT IS: ",eventCountPresent)
+            eventCountPast = eventCountPresent
+            writeInteger("[varSimTick]",0)
+            elseif readByte("[isDriving]") == 0 and eventCountPast == 1 and eventCountPresent == 2 then --UNDERCOVER COP APPEARANCE
+            print("WE ENTER 250 CUTSCENE AND PAST IS: ",eventCountPast," AND PRESENT IS: ",eventCountPresent)
+            eventCountPast = eventCountPresent
+            writeInteger("[varSimTick]",1)
+            elseif readByte("[isDriving]") == 1 and eventCountPast == 2 and eventCountPresent == 3 then --GET TO DRIVE AFTER CUTSCENE
+            print("WE EXIT 250 CUTSCENE AND PAST IS: ",eventCountPast," AND PRESENT IS: ",eventCountPresent)
+            eventCountPast = eventCountPresent
+            writeInteger("[varSimTick]",0)
+            end
+        elseif readInteger(getAddress("[storyEvent]")-0x64) == 2494877324 then --Las Vegas East A
+
+            if readByte("[isDriving]") == 0 and eventCountPast == eventCountPresent then
+            print("isDriving IS 0 &amp; PAST AND PRESENT ARE EQUAL")
+            eventCountPresent = eventCountPresent + 1 --FOR EVERY TIME YOU ENTER A CUSTSCENE
+            print("PAST: ",eventCountPast," PRESENT: ",eventCountPresent)
+            end
+            if readByte("[isDriving]") == 1 and eventCountPast == 0 and eventCountPresent == 1 then --GET TO DRIVE AFTER CUTSCENE
+            print("WE EXIT ARE YOU READY CUTSCENE AND PAST IS: ",eventCountPast," AND PRESENT IS: ",eventCountPresent)
+            eventCountPast = eventCountPresent
+            writeInteger("[varSimTick]",0)
+            end
+        elseif readInteger(getAddress("[storyEvent]")-0x64) == 2786791931 then --Las Vegas East Mini
+
+            if readByte("[isDriving]") == 0 and eventCountPast == eventCountPresent then
+            print("isDriving IS 0 &amp; PAST AND PRESENT ARE EQUAL")
+            eventCountPresent = eventCountPresent + 1 --FOR EVERY TIME YOU ENTER A CUSTSCENE
+            print("PAST: ",eventCountPast," PRESENT: ",eventCountPresent)
+            end
+            if readByte("[isDriving]") == 1 and eventCountPast == 0 and eventCountPresent == 1 then --GET TO DRIVE AFTER
+            print("WE EXIT ARE YOU READY CUTSCENE AND PAST IS: ",eventCountPast," AND PRESENT IS: ",eventCountPresent)
+            eventCountPast = eventCountPresent
+            writeInteger("[varSimTick]",0)
+            elseif readByte("[isDriving]") == 0 and eventCountPast == 1 and eventCountPresent == 2 then --BUSTED CUTSCENE
+            print("WE ENTER 250 CUTSCENE AND PAST IS: ",eventCountPast," AND PRESENT IS: ",eventCountPresent)
+            eventCountPast = eventCountPresent
+            writeInteger("[varSimTick]",1)
+            end
+        elseif readInteger(getAddress("[storyEvent]")-0x64) == 715814188 then --Las Vegas East Footchase
+
+            if readByte("[isDriving]") == 0 and eventCountPast == eventCountPresent then
+            print("isDriving IS 0 &amp; PAST AND PRESENT ARE EQUAL")
+            eventCountPresent = eventCountPresent + 1 --FOR EVERY TIME YOU ENTER A CUSTSCENE
+            print("PAST: ",eventCountPast," PRESENT: ",eventCountPresent)
+            end
+            if readByte("[isDriving]") == 0 and eventCountPast == 0 and eventCountPresent == 1 then --FOOTCHASE
+            print("WE EXIT ARE YOU READY CUTSCENE AND PAST IS: ",eventCountPast," AND PRESENT IS: ",eventCountPresent)
+            eventCountPast = eventCountPresent
+            writeInteger("[varSimTick]",1)
+            end
+        elseif readInteger(getAddress("[storyEvent]")-0x64) == 2858595558 then --Las Vegas Car Select
+
+            if readByte("[isDriving]") == 0 and eventCountPast == eventCountPresent then
+            print("isDriving IS 0 &amp; PAST AND PRESENT ARE EQUAL")
+            eventCountPresent = eventCountPresent + 1 --FOR EVERY TIME YOU ENTER A CUSTSCENE
+            print("PAST: ",eventCountPast," PRESENT: ",eventCountPresent)
+            end
+            if readByte("[isDriving]") == 1 and eventCountPast == 0 and eventCountPresent == 1 then --CAR SELECT
+            print("WE EXIT ARE YOU READY CUTSCENE AND PAST IS: ",eventCountPast," AND PRESENT IS: ",eventCountPresent)
+            eventCountPast = eventCountPresent
+            writeInteger("[varSimTick]",1)
+            end
+        elseif readInteger(getAddress("[storyEvent]")-0x64) == 3720932394 then --Death Valley Reverse
+
+            if readByte("[isDriving]") == 0 and eventCountPast == eventCountPresent then
+            print("isDriving IS 0 &amp; PAST AND PRESENT ARE EQUAL")
+            eventCountPresent = eventCountPresent + 1 --FOR EVERY TIME YOU ENTER A CUSTSCENE
+            print("PAST: ",eventCountPast," PRESENT: ",eventCountPresent)
+            end
+            if readByte("[isDriving]") == 0 and eventCountPast == 0 and eventCountPresent == 1 then --MARCUS BRAKECHECK
+            print("WE EXIT ARE YOU READY CUTSCENE AND PAST IS: ",eventCountPast," AND PRESENT IS: ",eventCountPresent)
+            eventCountPast = eventCountPresent
+            writeInteger("[varSimTick]",1)
+            elseif readByte("[isDriving]") == 1 and eventCountPast == 1 and eventCountPresent == 2 then --GET TO DRIVE AFTER CUTSCENE
+            print("WE ENTER 250 CUTSCENE AND PAST IS: ",eventCountPast," AND PRESENT IS: ",eventCountPresent)
+            eventCountPast = eventCountPresent
+            writeInteger("[varSimTick]",0)
+            end
+        elseif readInteger(getAddress("[storyEvent]")-0x64) == 2569133557 then --Million Dollar HWY B
+
+            if readByte("[isDriving]") == 0 and eventCountPast == eventCountPresent then
+            print("isDriving IS 0 &amp; PAST AND PRESENT ARE EQUAL")
+            eventCountPresent = eventCountPresent + 1 --FOR EVERY TIME YOU ENTER A CUSTSCENE
+            print("PAST: ",eventCountPast," PRESENT: ",eventCountPresent)
+            end
+            if readByte("[isDriving]") == 0 and eventCountPast == 0 and eventCountPresent == 1 then --COP CUTSCENE
+            print("WE EXIT ARE YOU READY CUTSCENE AND PAST IS: ",eventCountPast," AND PRESENT IS: ",eventCountPresent)
+            eventCountPast = eventCountPresent
+            writeInteger("[varSimTick]",1)
+            elseif readByte("[isDriving]") == 1 and eventCountPast == 1 and eventCountPresent == 2 then --GET TO DRIVE AFTER CUTSCENE
+            print("WE ENTER 250 CUTSCENE AND PAST IS: ",eventCountPast," AND PRESENT IS: ",eventCountPresent)
+            eventCountPast = eventCountPresent
+            writeInteger("[varSimTick]",0)
+            end
+        elseif readInteger(getAddress("[storyEvent]")-0x64) == 1979857418 then --Mountain Interstate Rev
+
+            if readByte("[isDriving]") == 0 and eventCountPast == eventCountPresent then
+            print("isDriving IS 0 &amp; PAST AND PRESENT ARE EQUAL")
+            eventCountPresent = eventCountPresent + 1 --FOR EVERY TIME YOU ENTER A CUSTSCENE
+            print("PAST: ",eventCountPast," PRESENT: ",eventCountPresent)
+            end
+            if readByte("[isDriving]") == 0 and eventCountPast == 0 and eventCountPresent == 1 then --OFFROAD CRASH
+            print("WE EXIT ARE YOU READY CUTSCENE AND PAST IS: ",eventCountPast," AND PRESENT IS: ",eventCountPresent)
+            eventCountPast = eventCountPresent
+            writeInteger("[varSimTick]",1)
+            elseif readByte("[isDriving]") == 1 and eventCountPast == 1 and eventCountPresent == 2 then --GET TO DRIVE AFTER CUTSCENE
+            print("WE ENTER 250 CUTSCENE AND PAST IS: ",eventCountPast," AND PRESENT IS: ",eventCountPresent)
+            eventCountPast = eventCountPresent
+            writeInteger("[varSimTick]",0)
+            end
+        elseif readInteger(getAddress("[storyEvent]")-0x64) == 2561852078 then --Indepenence Pass C
+
+            if readByte("[isDriving]") == 0 and eventCountPast == eventCountPresent then
+            print("isDriving IS 0 &amp; PAST AND PRESENT ARE EQUAL")
+            eventCountPresent = eventCountPresent + 1 --FOR EVERY TIME YOU ENTER A CUSTSCENE
+            print("PAST: ",eventCountPast," PRESENT: ",eventCountPresent)
+            end
+            if readByte("[isDriving]") == 0 and eventCountPast == 0 and eventCountPresent == 1 then --JACK CUTSCENE
+            print("WE EXIT ARE YOU READY CUTSCENE AND PAST IS: ",eventCountPast," AND PRESENT IS: ",eventCountPresent)
+            eventCountPast = eventCountPresent
+            writeInteger("[varSimTick]",1)
+            elseif readByte("[isDriving]") == 1 and eventCountPast == 1 and eventCountPresent == 2 then --GET TO DRIVE AFTER CUTSCENE
+            print("WE ENTER 250 CUTSCENE AND PAST IS: ",eventCountPast," AND PRESENT IS: ",eventCountPresent)
+            eventCountPast = eventCountPresent
+            writeInteger("[varSimTick]",0)
+            end
+        elseif readInteger(getAddress("[storyEvent]")-0x64) == 148619112 then --Plains Interstate
+
+            if readByte("[isDriving]") == 0 and eventCountPast == eventCountPresent then
+            print("isDriving IS 0 &amp; PAST AND PRESENT ARE EQUAL")
+            eventCountPresent = eventCountPresent + 1 --FOR EVERY TIME YOU ENTER A CUSTSCENE
+            print("PAST: ",eventCountPast," PRESENT: ",eventCountPresent)
+            end
+            if readByte("[isDriving]") == 0 and eventCountPast == 0 and eventCountPresent == 1 then --RIVAL DRIFT SHOWCASE
+            print("WE EXIT ARE YOU READY CUTSCENE AND PAST IS: ",eventCountPast," AND PRESENT IS: ",eventCountPresent)
+            eventCountPast = eventCountPresent
+            writeInteger("[varSimTick]",1)
+            elseif readByte("[isDriving]") == 1 and eventCountPast == 1 and eventCountPresent == 2 then --GET TO DRIVE AFTER CUTSCENE
+            print("WE ENTER 250 CUTSCENE AND PAST IS: ",eventCountPast," AND PRESENT IS: ",eventCountPresent)
+            eventCountPast = eventCountPresent
+            writeInteger("[varSimTick]",0)
+            end
+        elseif readInteger(getAddress("[storyEvent]")-0x64) == 1005996079 then --Chicago Interstate
+
+            if readByte("[isDriving]") == 0 and eventCountPast == eventCountPresent then
+            print("isDriving IS 0 &amp; PAST AND PRESENT ARE EQUAL")
+            eventCountPresent = eventCountPresent + 1 --FOR EVERY TIME YOU ENTER A CUSTSCENE
+            print("PAST: ",eventCountPast," PRESENT: ",eventCountPresent)
+            end
+            if readByte("[isDriving]") == 0 and eventCountPast == 0 and eventCountPresent == 1 then --MARCUS SHOOTING
+            print("WE EXIT ARE YOU READY CUTSCENE AND PAST IS: ",eventCountPast," AND PRESENT IS: ",eventCountPresent)
+            eventCountPast = eventCountPresent
+            writeInteger("[varSimTick]",1)
+            elseif readByte("[isDriving]") == 1 and eventCountPast == 1 and eventCountPresent == 2 then --GET TO DRIVE AFTER CUTSCENE
+            print("WE ENTER 250 CUTSCENE AND PAST IS: ",eventCountPast," AND PRESENT IS: ",eventCountPresent)
+            eventCountPast = eventCountPresent
+            writeInteger("[varSimTick]",0)
+            end
+        elseif readInteger(getAddress("[storyEvent]")-0x64) == 1130647398 then --Chicago Downtown Mini
+
+            if readByte("[isDriving]") == 0 and eventCountPast == eventCountPresent then
+            print("isDriving IS 0 &amp; PAST AND PRESENT ARE EQUAL")
+            eventCountPresent = eventCountPresent + 1 --FOR EVERY TIME YOU ENTER A CUSTSCENE
+            print("PAST: ",eventCountPast," PRESENT: ",eventCountPresent)
+            end
+            if readByte("[isDriving]") == 0 and eventCountPast == 0 and eventCountPresent == 1 then --MARCUS SHOWCASE
+            print("WE EXIT ARE YOU READY CUTSCENE AND PAST IS: ",eventCountPast," AND PRESENT IS: ",eventCountPresent)
+            eventCountPast = eventCountPresent
+            writeInteger("[varSimTick]",1)
+            elseif readByte("[isDriving]") == 1 and eventCountPast == 1 and eventCountPresent == 2 then --GET TO DRIVE AFTER CUTSCENE
+            print("WE ENTER 250 CUTSCENE AND PAST IS: ",eventCountPast," AND PRESENT IS: ",eventCountPresent)
+            eventCountPast = eventCountPresent
+            writeInteger("[varSimTick]",0)
+            elseif readByte("[isDriving]") == 0 and eventCountPast == 2 and eventCountPresent == 3 and readInteger(getAddress(readInteger("[sequenceHook_2]"))+0x31) == 1279608927 then --MOB TBONE CRASH
+            print("WE EXIT 250 CUTSCENE AND PAST IS: ",eventCountPast," AND PRESENT IS: ",eventCountPresent)
+            eventCountPast = eventCountPresent
+            writeInteger("[varSimTick]",1)
+            end
+        elseif readInteger(getAddress("[storyEvent]")-0x64) == 1880322147 then --Roof to Alley
+
+            if readByte("[isDriving]") == 0 and eventCountPast == eventCountPresent then
+            print("isDriving IS 0 &amp; PAST AND PRESENT ARE EQUAL")
+            eventCountPresent = eventCountPresent + 1 --FOR EVERY TIME YOU ENTER A CUSTSCENE
+            print("PAST: ",eventCountPast," PRESENT: ",eventCountPresent)
+            end
+            if readByte("[isDriving]") == 0 and eventCountPast == 0 and eventCountPresent == 1 then --ROOF SURVIVAL
+            print("WE EXIT ARE YOU READY CUTSCENE AND PAST IS: ",eventCountPast," AND PRESENT IS: ",eventCountPresent)
+            eventCountPast = eventCountPresent
+            writeInteger("[varSimTick]",1)
+            end
+        elseif readInteger(getAddress("[storyEvent]")-0x64) == 2641126162 then --Chicago Downtown Heli Chase
+
+            if readByte("[isDriving]") == 0 and eventCountPast == eventCountPresent then
+            print("isDriving IS 0 &amp; PAST AND PRESENT ARE EQUAL")
+            eventCountPresent = eventCountPresent + 1 --FOR EVERY TIME YOU ENTER A CUSTSCENE
+            print("PAST: ",eventCountPast," PRESENT: ",eventCountPresent)
+            end
+            if readByte("[isDriving]") == 0 and eventCountPast == 0 and eventCountPresent == 1 then --COP CAR THEFT
+            print("WE EXIT ARE YOU READY CUTSCENE AND PAST IS: ",eventCountPast," AND PRESENT IS: ",eventCountPresent)
+            eventCountPast = eventCountPresent
+            writeInteger("[varSimTick]",1)
+            elseif readByte("[isDriving]") == 1 and eventCountPast == 1 and eventCountPresent == 2 then --GET TO DRIVE AFTER CUTSCENE
+            print("WE ENTER 250 CUTSCENE AND PAST IS: ",eventCountPast," AND PRESENT IS: ",eventCountPresent)
+            eventCountPast = eventCountPresent
+            writeInteger("[varSimTick]",0)
+            elseif readByte("[isDriving]") == 0 and eventCountPast == 2 and eventCountPresent == 3 and readInteger(getAddress(readInteger("[sequenceHook_1]"))+0x33) == 1413563716 then --MOB HELI TRAFFIC SHOOTING
+            print("WE EXIT 250 CUTSCENE AND PAST IS: ",eventCountPast," AND PRESENT IS: ",eventCountPresent)
+            eventCountPast = eventCountPresent
+            writeInteger("[varSimTick]",1)
+            elseif readByte("[isDriving]") == 1 and eventCountPast == 3 and eventCountPresent == 4 then --GET TO DRIVE AFTER CUTSCENE
+            print("WE ENTER JUMP CUTSCENE AND PAST IS: ",eventCountPast," AND PRESENT IS: ",eventCountPresent)
+            writeInteger("[varSimTick]",0)
+            eventCountPast = eventCountPresent
+            elseif readByte("[isDriving]") == 0 and eventCountPast == 4 and eventCountPresent == 5 and readInteger(getAddress(readInteger("[sequenceHook_1]"))+0x2E) == 876823891 then --MOB HELI TRAFFIC SHOOTING
+            print("WE ENTER JUMP CUTSCENE AND PAST IS: ",eventCountPast," AND PRESENT IS: ",eventCountPresent)
+            writeInteger("[varSimTick]",1)
+            eventCountPast = eventCountPresent
+            elseif readByte("[isDriving]") == 1 and eventCountPast == 5 and eventCountPresent == 6 then --GET TO DRIVE AFTER CUTSCENE
+            print("WE ENTER JUMP CUTSCENE AND PAST IS: ",eventCountPast," AND PRESENT IS: ",eventCountPresent)
+            writeInteger("[varSimTick]",0)
+            eventCountPast = eventCountPresent
+            elseif readByte("[isDriving]") == 0 and eventCountPast == 6 and eventCountPresent == 7 and readInteger(getAddress(readInteger("[sequenceHook_1]"))+0x2E) == 1381256777 then --MOB HELICOPTER CRASH
+            print("WE ENTER JUMP CUTSCENE AND PAST IS: ",eventCountPast," AND PRESENT IS: ",eventCountPresent)
+            writeInteger("[varSimTick]",1)
+            eventCountPast = eventCountPresent
+            end
+        elseif readInteger(getAddress("[storyEvent]")-0x64) == 250901999 then --Trapped with Train
+
+            if readByte("[isDriving]") == 0 and eventCountPast == eventCountPresent then
+            print("isDriving IS 0 &amp; PAST AND PRESENT ARE EQUAL")
+            eventCountPresent = eventCountPresent + 1 --FOR EVERY TIME YOU ENTER A CUSTSCENE
+            print("PAST: ",eventCountPast," PRESENT: ",eventCountPresent)
+            end
+            if readByte("[isDriving]") == 0 and eventCountPast == 0 and eventCountPresent == 1 then --COP CAR ESCAPE
+            print("WE EXIT ARE YOU READY CUTSCENE AND PAST IS: ",eventCountPast," AND PRESENT IS: ",eventCountPresent)
+            eventCountPast = eventCountPresent
+            writeInteger("[varSimTick]",1)
+            end
+        elseif readInteger(getAddress("[storyEvent]")-0x64) == 2464602148 then --Car Select Chicago Downtown
+
+            if readByte("[isDriving]") == 0 and eventCountPast == eventCountPresent then
+            print("isDriving IS 0 &amp; PAST AND PRESENT ARE EQUAL")
+            eventCountPresent = eventCountPresent + 1 --FOR EVERY TIME YOU ENTER A CUSTSCENE
+            print("PAST: ",eventCountPast," PRESENT: ",eventCountPresent)
+            end
+            if readByte("[isDriving]") == 0 and eventCountPast == 0 and eventCountPresent == 1 then --CHICAGO CAR SELECT
+            print("WE EXIT ARE YOU READY CUTSCENE AND PAST IS: ",eventCountPast," AND PRESENT IS: ",eventCountPresent)
+            eventCountPast = eventCountPresent
+            writeInteger("[varSimTick]",1)
+            end
+        elseif readInteger(getAddress("[storyEvent]")-0x64) == 571722006 then --Chicago Industrial Action Level
+
+            if readByte("[isDriving]") == 0 and eventCountPast == eventCountPresent then
+            print("isDriving IS 0 &amp; PAST AND PRESENT ARE EQUAL")
+            eventCountPresent = eventCountPresent + 1 --FOR EVERY TIME YOU ENTER A CUSTSCENE
+            print("PAST: ",eventCountPast," PRESENT: ",eventCountPresent)
+            end
+            if readByte("[isDriving]") == 0 and eventCountPast == 0 and eventCountPresent == 1 then --MOB CAYENNES CHASING
+            print("WE EXIT ARE YOU READY CUTSCENE AND PAST IS: ",eventCountPast," AND PRESENT IS: ",eventCountPresent)
+            eventCountPast = eventCountPresent
+            writeInteger("[varSimTick]",1)
+            elseif readByte("[isDriving]") == 1 and eventCountPast == 1 and eventCountPresent == 2 then --GET TO DRIVE AFTER CUTSCENE
+            print("WE ENTER 250 CUTSCENE AND PAST IS: ",eventCountPast," AND PRESENT IS: ",eventCountPresent)
+            eventCountPast = eventCountPresent
+            writeInteger("[varSimTick]",1)
+            elseif readByte("[isDriving]") == 0 and eventCountPast == 2 and eventCountPresent == 3 and readInteger(getAddress(readInteger("[sequenceHook_2]"))+0x30) == 860046675 then --JUMP AND MOB CAYENNE TAKEDOWN
+            print("WE EXIT 250 CUTSCENE AND PAST IS: ",eventCountPast," AND PRESENT IS: ",eventCountPresent)
+            isInNISCutscene = 1
+            eventCountPast = eventCountPresent
+            writeInteger("[varSimTick]",0)
+            memoryrecord_freeze(CheatEntry)
+            elseif readByte("[isDriving]") == 1 and eventCountPast == 3 and eventCountPresent == 4 then --GET TO DRIVE AFTER CUTSCENE
+            print("WE ENTER JUMP CUTSCENE AND PAST IS: ",eventCountPast," AND PRESENT IS: ",eventCountPresent)
+            isInNISCutscene = 0
+            eventCountPast = eventCountPresent
+            memoryrecord_unfreeze(CheatEntry)
+            elseif readByte("[isDriving]") == 0 and eventCountPast == 4 and eventCountPresent == 5 and readInteger(getAddress(readInteger("[sequenceHook_2]"))+0x30) == 910378323 then --DRIFT AND MOB HELI SHOOTING
+            print("WE ENTER JUMP CUTSCENE AND PAST IS: ",eventCountPast," AND PRESENT IS: ",eventCountPresent)
+            isInNISCutscene = 1
+            eventCountPast = eventCountPresent
+            writeInteger("[varSimTick]",0)
+            memoryrecord_freeze(CheatEntry)
+            elseif readByte("[isDriving]") == 1 and eventCountPast == 5 and eventCountPresent == 6 then --GET TO DRIVE AFTER CUTSCENE
+            print("WE ENTER JUMP CUTSCENE AND PAST IS: ",eventCountPast," AND PRESENT IS: ",eventCountPresent)
+            isInNISCutscene = 0
+            eventCountPast = eventCountPresent
+            memoryrecord_unfreeze(CheatEntry)
+            elseif readByte("[isDriving]") == 0 and eventCountPast == 6 and eventCountPresent == 7 and readInteger(getAddress(readInteger("[sequenceHook_2]"))+0x34) == 1414745936 then --MOB HELI TAKEDOWN JUMP
+            print("WE ENTER JUMP CUTSCENE AND PAST IS: ",eventCountPast," AND PRESENT IS: ",eventCountPresent)
+            eventCountPast = eventCountPresent
+            writeInteger("[varSimTick]",1)
+            end
+        elseif readInteger(getAddress("[storyEvent]")-0x64) == 2427292706 then --Uri Car Select
+
+            if readByte("[isDriving]") == 0 and eventCountPast == eventCountPresent then
+            print("isDriving IS 0 &amp; PAST AND PRESENT ARE EQUAL")
+            eventCountPresent = eventCountPresent + 1 --FOR EVERY TIME YOU ENTER A CUSTSCENE
+            print("PAST: ",eventCountPast," PRESENT: ",eventCountPresent)
+            end
+            if readByte("[isDriving]") == 0 and eventCountPast == 0 and eventCountPresent == 1 then --URI CAR SELECT
+            print("WE EXIT ARE YOU READY CUTSCENE AND PAST IS: ",eventCountPast," AND PRESENT IS: ",eventCountPresent)
+            eventCountPast = eventCountPresent
+            writeInteger("[varSimTick]",1)
+            end
+        elseif readInteger(getAddress("[storyEvent]")-0x64) == 3504851546 then --Smoky Mountain Rev A
+
+            if readByte("[isDriving]") == 0 and eventCountPast == eventCountPresent then
+            print("isDriving IS 0 &amp; PAST AND PRESENT ARE EQUAL")
+            eventCountPresent = eventCountPresent + 1 --FOR EVERY TIME YOU ENTER A CUSTSCENE
+            print("PAST: ",eventCountPast," PRESENT: ",eventCountPresent)
+            end
+            if readByte("[isDriving]") == 0 and eventCountPast == 0 and eventCountPresent == 1 then --MILA SHOWCASE
+            print("WE EXIT ARE YOU READY CUTSCENE AND PAST IS: ",eventCountPast," AND PRESENT IS: ",eventCountPresent)
+            eventCountPast = eventCountPresent
+            writeInteger("[varSimTick]",1)
+            elseif readByte("[isDriving]") == 1 and eventCountPast == 1 and eventCountPresent == 2 then --GET TO DRIVE AFTER CUTSCENE
+            print("WE ENTER 250 CUTSCENE AND PAST IS: ",eventCountPast," AND PRESENT IS: ",eventCountPresent)
+            eventCountPast = eventCountPresent
+            writeInteger("[varSimTick]",0)
+            end
+        elseif readInteger(getAddress("[storyEvent]")-0x64) == 601421103 then --Smoky Mountain Rev B
+
+            if readByte("[isDriving]") == 0 and eventCountPast == eventCountPresent then
+            print("isDriving IS 0 &amp; PAST AND PRESENT ARE EQUAL")
+            eventCountPresent = eventCountPresent + 1 --FOR EVERY TIME YOU ENTER A CUSTSCENE
+            print("PAST: ",eventCountPast," PRESENT: ",eventCountPresent)
+            end
+            if readByte("[isDriving]") == 0 and eventCountPast == 0 and eventCountPresent == 1 then --HIDDEN COP
+            print("WE EXIT ARE YOU READY CUTSCENE AND PAST IS: ",eventCountPast," AND PRESENT IS: ",eventCountPresent)
+            eventCountPast = eventCountPresent
+            writeInteger("[varSimTick]",1)
+            elseif readByte("[isDriving]") == 1 and eventCountPast == 1 and eventCountPresent == 2 then --GET TO DRIVE AFTER CUTSCENE
+            print("WE ENTER 250 CUTSCENE AND PAST IS: ",eventCountPast," AND PRESENT IS: ",eventCountPresent)
+            eventCountPast = eventCountPresent
+            writeInteger("[varSimTick]",0)
+            end
+        elseif readInteger(getAddress("[storyEvent]")-0x64) == 2872627479 then --Smoky Mountain A
+
+            if readByte("[isDriving]") == 0 and eventCountPast == eventCountPresent then
+            print("isDriving IS 0 &amp; PAST AND PRESENT ARE EQUAL")
+            eventCountPresent = eventCountPresent + 1 --FOR EVERY TIME YOU ENTER A CUSTSCENE
+            print("PAST: ",eventCountPast," PRESENT: ",eventCountPresent)
+            end
+            if readByte("[isDriving]") == 0 and eventCountPast == 0 and eventCountPresent == 1 then --JACK CUTSCENE
+            print("WE EXIT ARE YOU READY CUTSCENE AND PAST IS: ",eventCountPast," AND PRESENT IS: ",eventCountPresent)
+            eventCountPast = eventCountPresent
+            writeInteger("[varSimTick]",1)
+            elseif readByte("[isDriving]") == 1 and eventCountPast == 1 and eventCountPresent == 2 then --GET TO DRIVE AFTER CUTSCENE
+            print("WE ENTER 250 CUTSCENE AND PAST IS: ",eventCountPast," AND PRESENT IS: ",eventCountPresent)
+            eventCountPast = eventCountPresent
+            writeInteger("[varSimTick]",0)
+            end
+        elseif readInteger(getAddress("[storyEvent]")-0x64) == 3720273376 then --New Jersey Rev
+
+            if readByte("[isDriving]") == 0 and eventCountPast == eventCountPresent then
+            print("isDriving IS 0 &amp; PAST AND PRESENT ARE EQUAL")
+            eventCountPresent = eventCountPresent + 1 --FOR EVERY TIME YOU ENTER A CUSTSCENE
+            print("PAST: ",eventCountPast," PRESENT: ",eventCountPresent)
+            end
+            if readByte("[isDriving]") == 0 and eventCountPast == 0 and eventCountPresent == 1 then --DELEON SHOWCASE
+            print("WE EXIT ARE YOU READY CUTSCENE AND PAST IS: ",eventCountPast," AND PRESENT IS: ",eventCountPresent)
+            eventCountPast = eventCountPresent
+            writeInteger("[varSimTick]",1)
+            elseif readByte("[isDriving]") == 1 and eventCountPast == 1 and eventCountPresent == 2 then --GET TO DRIVE AFTER CUTSCENE
+            print("WE ENTER 250 CUTSCENE AND PAST IS: ",eventCountPast," AND PRESENT IS: ",eventCountPresent)
+            eventCountPast = eventCountPresent
+            writeInteger("[varSimTick]",0)
+            end
+        elseif readInteger(getAddress("[storyEvent]")-0x64) == 3732571019 then --New York A
+
+            if readByte("[isDriving]") == 0 and eventCountPast == eventCountPresent then
+            print("isDriving IS 0 &amp; PAST AND PRESENT ARE EQUAL")
+            eventCountPresent = eventCountPresent + 1 --FOR EVERY TIME YOU ENTER A CUSTSCENE
+            print("PAST: ",eventCountPast," PRESENT: ",eventCountPresent)
+            end
+            if readByte("[isDriving]") == 0 and eventCountPast == 0 and eventCountPresent == 1 then --CALVIN SHOWCASE
+            print("WE EXIT ARE YOU READY CUTSCENE AND PAST IS: ",eventCountPast," AND PRESENT IS: ",eventCountPresent)
+            eventCountPast = eventCountPresent
+            writeInteger("[varSimTick]",0)
+            elseif readByte("[isDriving]") == 1 and eventCountPast == 1 and eventCountPresent == 2 then --WE DISABLE VSYNC FOR THE GET TO 250 CUTSCENE
+            print("WE ENTER 250 CUTSCENE AND PAST IS: ",eventCountPast," AND PRESENT IS: ",eventCountPresent)
+            eventCountPast = eventCountPresent
+            writeInteger("[varSimTick]",1)
+            end
+        elseif readInteger(getAddress("[storyEvent]")-0x64) == 1177725796 then --New York B
+
+            if readByte("[isDriving]") == 0 and eventCountPast == eventCountPresent then
+            print("isDriving IS 0 &amp; PAST AND PRESENT ARE EQUAL")
+            eventCountPresent = eventCountPresent + 1 --FOR EVERY TIME YOU ENTER A CUSTSCENE
+            print("PAST: ",eventCountPast," PRESENT: ",eventCountPresent)
+            end
+            if readByte("[isDriving]") == 0 and eventCountPast == 0 and eventCountPresent == 1 then --JACK CUTSCENE
+            print("WE EXIT ARE YOU READY CUTSCENE AND PAST IS: ",eventCountPast," AND PRESENT IS: ",eventCountPresent)
+            eventCountPast = eventCountPresent
+            writeInteger("[varSimTick]",1)
+            elseif readByte("[isDriving]") == 1 and eventCountPast == 1 and eventCountPresent == 2 then --GET TO DRIVE AFTER CUTSCENE
+            print("WE ENTER 250 CUTSCENE AND PAST IS: ",eventCountPast," AND PRESENT IS: ",eventCountPresent)
+            eventCountPast = eventCountPresent
+            writeInteger("[varSimTick]",0)
+            elseif readByte("[isDriving]") == 0 and eventCountPast == 2 and eventCountPresent == 3 and readInteger(getAddress(readInteger("[sequenceHook_1]"))+0x27) == 860046675 then --MARCUS SHOOTING ATTEMPT
+            print("WE EXIT 250 CUTSCENE AND PAST IS: ",eventCountPast," AND PRESENT IS: ",eventCountPresent)
+            eventCountPast = eventCountPresent
+            writeInteger("[varSimTick]",1)
+            elseif readByte("[isDriving]") == 1 and eventCountPast == 3 and eventCountPresent == 4 then --GET TO DRIVE AFTER CUTSCENE
+            print("WE ENTER JUMP CUTSCENE AND PAST IS: ",eventCountPast," AND PRESENT IS: ",eventCountPresent)
+            writeInteger("[varSimTick]",0)
+            eventCountPast = eventCountPresent
+            elseif readByte("[isDriving]") == 1 and eventCountPast == 4 and eventCountPresent == 5 and readInteger(getAddress(readInteger("[sequenceHook_1]"))+0x27) == 943932755 then --FINAL LEG
+            print("WE ENTER JUMP CUTSCENE AND PAST IS: ",eventCountPast," AND PRESENT IS: ",eventCountPresent)
+            writeInteger("[varSimTick]",1)
+            eventCountPast = eventCountPresent
+            elseif readByte("[isDriving]") == 1 and eventCountPast == 5 and eventCountPresent == 6 then --GET TO DRIVE AFTER CUTSCENE
+            print("WE ENTER JUMP CUTSCENE AND PAST IS: ",eventCountPast," AND PRESENT IS: ",eventCountPresent)
+            writeInteger("[varSimTick]",0)
+            eventCountPast = eventCountPresent
+            elseif readByte("[isDriving]") == 1 and eventCountPast == 6 and eventCountPresent == 7 then --MARCUS CRASH
+            print("WE ENTER JUMP CUTSCENE AND PAST IS: ",eventCountPast," AND PRESENT IS: ",eventCountPresent)
+            writeInteger("[varSimTick]",1)
+            eventCountPast = eventCountPresent
+            end
+        end
+    end
+end
+
+ew = createTimer(nil)
+timer_onTimer(ew,eventWatch)
+timer_setInterval(ew, 1)
+timer_setEnabled(ew, true)
+
+[DISABLE]
+timer_setEnabled(ew, false)
+</AssemblerScript>
+        </CheatEntry>
+        <CheatEntry>
+          <ID>993</ID>
+          <Description>"GameTime Settings"</Description>
+          <LastState/>
+          <VariableType>Auto Assembler Script</VariableType>
+          <AssemblerScript>[ENABLE]
+alloc(newmem,2048)
+alloc(varSimTick,$500)
+registersymbol(varSimTick)
+label(returnhere)
+label(originalcode)
+label(exit)
+
+newmem: //this is allocated memory, you have read,write,execute access
+push edi
+lea edi,[eax+40]
+mov [varSimTick],edi
+pop edi
+jmp originalcode
+
+originalcode:
+mov cl,[eax+40]
+mov eax,[ebx+08]
+
+exit:
+jmp returnhere
+
+"Need for Speed The Run.exe"+A607F7:
+jmp newmem
+nop
+returnhere:
+
+[DISABLE]
+dealloc(newmem)
+"Need for Speed The Run.exe"+A607F7:
+mov cl,[eax+40]
+mov eax,[ebx+08]
+</AssemblerScript>
+          <CheatEntries>
+            <CheatEntry>
+              <ID>994</ID>
+              <Description>"VariableSimTickTimeEnable"</Description>
+              <ShowAsSigned>0</ShowAsSigned>
+              <VariableType>4 Bytes</VariableType>
+              <Address>varSimTick</Address>
+              <Offsets>
+                <Offset>0</Offset>
+              </Offsets>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>995</ID>
+              <Description>"MaxVariableFps"</Description>
+              <ShowAsSigned>0</ShowAsSigned>
+              <VariableType>Float</VariableType>
+              <Address>varSimTick</Address>
+              <Offsets>
+                <Offset>-18</Offset>
+              </Offsets>
+              <Hotkeys>
+                <Hotkey>
+                  <Action>Set Value</Action>
+                  <Keys>
+                    <Key>103</Key>
+                  </Keys>
+                  <Value>60</Value>
+                  <ID>0</ID>
+                </Hotkey>
+                <Hotkey>
+                  <Action>Set Value</Action>
+                  <Keys>
+                    <Key>104</Key>
+                  </Keys>
+                  <Value>120</Value>
+                  <ID>1</ID>
+                </Hotkey>
+                <Hotkey>
+                  <Action>Set Value</Action>
+                  <Keys>
+                    <Key>105</Key>
+                  </Keys>
+                  <Value>144</Value>
+                  <ID>2</ID>
+                </Hotkey>
+                <Hotkey>
+                  <Action>Set Value</Action>
+                  <Keys>
+                    <Key>100</Key>
+                  </Keys>
+                  <Value>165</Value>
+                  <ID>3</ID>
+                </Hotkey>
+                <Hotkey>
+                  <Action>Set Value</Action>
+                  <Keys>
+                    <Key>101</Key>
+                  </Keys>
+                  <Value>240</Value>
+                  <ID>4</ID>
+                </Hotkey>
+                <Hotkey>
+                  <Action>Set Value</Action>
+                  <Keys>
+                    <Key>102</Key>
+                  </Keys>
+                  <Value>360</Value>
+                  <ID>5</ID>
+                </Hotkey>
+                <Hotkey>
+                  <Action>Set Value</Action>
+                  <Keys>
+                    <Key>97</Key>
+                  </Keys>
+                  <Value>0</Value>
+                  <ID>6</ID>
+                </Hotkey>
+              </Hotkeys>
+            </CheatEntry>
+          </CheatEntries>
+        </CheatEntry>
+        <CheatEntry>
+          <ID>996</ID>
+          <Description>"Player Vehicle Control Check"</Description>
+          <Options moHideChildren="1"/>
+          <LastState/>
+          <VariableType>Auto Assembler Script</VariableType>
+          <AssemblerScript>[ENABLE]
+alloc(newmem,2048)
+alloc(isdriving,$500)
+registersymbol(isdriving)
+label(returnhere)
+label(originalcode)
+label(exit)
+
+newmem: //this is allocated memory, you have read,write,execute access
+push ebx
+lea ebx,[esi+04]
+mov [isdriving],ebx
+pop ebx
+jmp originalcode
+
+originalcode:
+cmp byte ptr [esi+04],00
+push edi
+
+exit:
+jmp returnhere
+
+"Need for Speed The Run.exe"+3F6C73:
+jmp newmem
+returnhere:
+
+[DISABLE]
+dealloc(newmem)
+dealloc(isdriving)
+unregistersymbol(isdriving)
+"Need for Speed The Run.exe"+3F6C73:
+cmp byte ptr [esi+04],00
+push edi
+</AssemblerScript>
+          <CheatEntries>
+            <CheatEntry>
+              <ID>997</ID>
+              <Description>"PlayerHasVehicleControl"</Description>
+              <ShowAsSigned>0</ShowAsSigned>
+              <VariableType>Byte</VariableType>
+              <Address>isDriving</Address>
+              <Offsets>
+                <Offset>0</Offset>
+              </Offsets>
+            </CheatEntry>
+          </CheatEntries>
+        </CheatEntry>
+        <CheatEntry>
+          <ID>1005</ID>
+          <Description>"Story Mode Event Hook"</Description>
+          <Options moHideChildren="1"/>
+          <LastState/>
+          <VariableType>Auto Assembler Script</VariableType>
+          <AssemblerScript>[ENABLE]
+alloc(newmem,2048)
+alloc(storyEvent,$500)
+registersymbol(storyEvent)
+label(returnhere)
+label(originalcode)
+label(exit)
+
+newmem:
+push ebx
+lea ebx,[eax+60]
+mov [storyEvent],ebx
+pop ebx
+jmp originalcode
+
+originalcode:
+mov ecx,[eax+60]
+mov edx,[edi]
+
+exit:
+jmp returnhere
+
+"Need For Speed The Run.exe"+59BF15:
+jmp newmem
+returnhere:
+
+[DISABLE]
+dealloc(newmem)
+dealloc(storyEvent)
+"Need For Speed The Run.exe"+59BF15:
+mov ecx,[eax+60]
+mov edx,[edi]
+</AssemblerScript>
+          <CheatEntries>
+            <CheatEntry>
+              <ID>1009</ID>
+              <Description>"Story Mode Event Challenge"</Description>
+              <ShowAsSigned>0</ShowAsSigned>
+              <VariableType>4 Bytes</VariableType>
+              <Address>storyEvent</Address>
+              <Offsets>
+                <Offset>-64</Offset>
+              </Offsets>
+            </CheatEntry>
+          </CheatEntries>
+        </CheatEntry>
+        <CheatEntry>
+          <ID>1038</ID>
+          <Description>"Pause Menu Hook"</Description>
+          <Options moHideChildren="1"/>
+          <LastState/>
+          <VariableType>Auto Assembler Script</VariableType>
+          <AssemblerScript>[ENABLE]
+alloc(pauseMenu,$500)
+registersymbol(pauseMenu)
+alloc(newmem,2048)
+label(returnhere)
+label(originalcode)
+label(exit)
+
+//OLD HOOK
+//"Need For Speed The Run.exe"+4C6654
+
+newmem:
+push ebx
+lea ebx,[esi+000000C4]
+mov [pauseMenu],ebx
+pop ebx
+jmp originalcode
+
+originalcode:
+cmp dword ptr [esi+000000C4],00
+
+exit:
+jmp returnhere
+
+"Need For Speed The Run.exe"+11374:
+jmp newmem
+nop 2
+returnhere:
+
+[DISABLE]
+dealloc(*)
+unregistersymbol(*)
+"Need For Speed The Run.exe"+11374:
+cmp dword ptr [esi+000000C4],00
+</AssemblerScript>
+          <CheatEntries>
+            <CheatEntry>
+              <ID>1039</ID>
+              <Description>"Pause Menu Switch"</Description>
+              <ShowAsSigned>0</ShowAsSigned>
+              <VariableType>4 Bytes</VariableType>
+              <Address>pauseMenu</Address>
+              <Offsets>
+                <Offset>0</Offset>
+              </Offsets>
+            </CheatEntry>
+          </CheatEntries>
+        </CheatEntry>
+        <CheatEntry>
+          <ID>998</ID>
+          <Description>"Sequence Hook 1"</Description>
+          <Options moHideChildren="1"/>
+          <LastState/>
+          <VariableType>Auto Assembler Script</VariableType>
+          <AssemblerScript>[ENABLE]
+alloc(newmem,2048)
+alloc(sequenceHook_1,$500)
+registersymbol(sequenceHook_1)
+label(returnhere)
+label(originalcode)
+label(exit)
+
+newmem:
+push ebx
+lea ebx,[ecx+60]
+mov [sequenceHook_1],ebx
+pop ebx
+jmp originalcode
+
+originalcode:
+mov ecx,[ecx+60]
+push 01
+
+exit:
+jmp returnhere
+
+"Need For Speed The Run.exe"+E97C5E:
+jmp newmem
+returnhere:
+
+[DISABLE]
+dealloc(*)
+unregistersymbol(*)
+"Need For Speed The Run.exe"+E97C5E:
+mov ecx,[ecx+60]
+push 01
+</AssemblerScript>
+          <CheatEntries>
+            <CheatEntry>
+              <ID>1000</ID>
+              <Description>"String Reference"</Description>
+              <ShowAsSigned>0</ShowAsSigned>
+              <VariableType>4 Bytes</VariableType>
+              <Address>sequenceHook_1</Address>
+              <Offsets>
+                <Offset>0</Offset>
+              </Offsets>
+            </CheatEntry>
+          </CheatEntries>
+        </CheatEntry>
+        <CheatEntry>
+          <ID>999</ID>
+          <Description>"Sequence Hook 2"</Description>
+          <Options moHideChildren="1"/>
+          <LastState/>
+          <VariableType>Auto Assembler Script</VariableType>
+          <AssemblerScript>[ENABLE]
+alloc(newmem,2048)
+alloc(sequenceHook_2,$500)
+registersymbol(sequenceHook_2)
+label(returnhere)
+label(originalcode)
+label(exit)
+
+newmem:
+push ebx
+lea ebx,[edx+60]
+mov [sequenceHook_2],ebx
+pop ebx
+jmp originalcode
+
+originalcode:
+mov ecx,[edx+60]
+push 01
+
+exit:
+jmp returnhere
+
+"Need For Speed The Run.exe"+E97C92:
+jmp newmem
+returnhere:
+
+[DISABLE]
+dealloc(*)
+unregistersymbol(*)
+"Need For Speed The Run.exe"+E97C92:
+mov ecx,[edx+60]
+push 01
+</AssemblerScript>
+          <CheatEntries>
+            <CheatEntry>
+              <ID>1050</ID>
+              <Description>"String Reference"</Description>
+              <ShowAsSigned>0</ShowAsSigned>
+              <VariableType>4 Bytes</VariableType>
+              <Address>sequenceHook_2</Address>
+              <Offsets>
+                <Offset>0</Offset>
+              </Offsets>
+            </CheatEntry>
+          </CheatEntries>
+        </CheatEntry>
+        <CheatEntry>
+          <ID>747</ID>
+          <Description>"Chicago Interstate Action Level Crash Bypass"</Description>
+          <LastState/>
+          <VariableType>Auto Assembler Script</VariableType>
+          <AssemblerScript>[ENABLE]
+
+00E4EB60:
+nop
+nop
+nop
+nop
+nop
+nop
+
+00E50F0E:
+nop
+nop
+nop
+nop
+nop
+nop
+
+[DISABLE]
+
+00E4EB60:
+mov [eax+00000090],edx
+
+00E50F0E:
+mov [edi+00000090],eax
+</AssemblerScript>
+        </CheatEntry>
+        <CheatEntry>
+          <ID>1</ID>
+          <Description>"String Swap"</Description>
+          <LastState/>
+          <VariableType>Auto Assembler Script</VariableType>
+          <AssemblerScript>{$lua}
+getLuaEngine().cbShowOnPrint.Checked=false
+getLuaEngine().hide()
+
+function DEC_HEX(IN)
+    local B,K,OUT,I,D=16,"0123456789ABCDEF","",0
+    while IN&gt;0 do
+        I=I+1
+        IN,D=math.floor(IN/B),math.mod(IN,B)+1
+        OUT=string.sub(K,D,D)..OUT
+    end
+    return OUT
+end
+
+function Split(s, delimiter)
+    result = {};
+    for match in (s..delimiter):gmatch("(.-)"..delimiter) do
+        table.insert(result, match);
+    end
+    return result;
+end
+
+function AOBtoDEC(str)
+    split_string = Split(str, " ")
+    local hex = ""
+    for i=1,#split_string do
+        hex = hex .. split_string[#split_string+1-i]
+    end
+    return(tonumber(hex,16))
+end
+
+function hexByteString(addressdec)
+    local decByteString = table.concat(readBytes(addressdec,4,true),' ')
+    local hexByteS = decByteString:gsub('%S+',function (c) return string.format('%02X',c) end)
+    return(hexByteS)
+end
+
+local addressStart = "F0000000" --First Vehicle of Customization Template
+local addressEnd = "FFFFFFFF" --Last Vehicle of Customization Template
+
+[ENABLE]
+
+local AOB = "4D 41 4C 00 52 45 41 4C 49 53 54 49 43 00 53 45 4C 45 43 54 20 41 20 50 4C 41 59 4C 49 53 54 00"
+local MyMemscan = createMemScan()
+memscan_returnOnlyOneResult(MyMemscan, true)
+memscan_firstScan(MyMemscan,soExactValue,vtByteArray,0,AOB,"",addressStart,addressEnd,"*X*W*C",0,"",true,true,false,false)
+memscan_waitTillDone(MyMemscan)
+local address = memscan_getOnlyResult(MyMemscan) --Returns the address in integer format
+if address ~= nil then
+    local string_end = {0x00}
+    writeString(address+0x20,"FRAMERATE UNLOCKER")
+    writeBytes(address+0x32,string_end)
+    print "String Swap Complete Complete!"
+else
+    print "String Swap Failed!"
+end
+
+
+[DISABLE]
+
+</AssemblerScript>
+        </CheatEntry>
+        <CheatEntry>
+          <ID>1007</ID>
+          <Description>"Garage Car Render"</Description>
+          <LastState/>
+          <VariableType>Auto Assembler Script</VariableType>
+          <AssemblerScript>[ENABLE]
+
+//Tends to crash if many vehicles (+20) are instanced and hidden (invisible)
+
+aobscan(carrender,C5 ED F2 21 00 00 00 00 00)
+registersymbol(carrender)
+
+carrender+08:
+  db 02
+
+[DISABLE]
+
+carrender+08:
+  db 00
+
+unregistersymbol(carrender)
+
+</AssemblerScript>
+          <Hotkeys>
+            <Hotkey>
+              <Action>Toggle Activation</Action>
+              <Keys>
+                <Key>117</Key>
+              </Keys>
+              <ID>0</ID>
+            </Hotkey>
+          </Hotkeys>
+        </CheatEntry>
+      </CheatEntries>
+    </CheatEntry>
+    <CheatEntry>
+      <ID>992</ID>
+      <Description>"VSync"</Description>
+      <LastState/>
+      <VariableType>Auto Assembler Script</VariableType>
+      <AssemblerScript>[ENABLE]
+
+/*
+004106F6:
+jmp 00410720
+
+00410710:
+mov byte ptr [02714099],00
+
+00410717:
+mov byte ptr [02753F00],00
+*/
+
+004106F8:
+mov byte ptr [02714099],00
+
+004106FF:
+mov byte ptr [02753F00],00
+
+00410706:
+nop
+nop
+nop
+nop
+nop
+
+0041070B:
+mov byte ptr [esp+13],00
+
+00410710:
+mov byte ptr [02714099],00
+
+00410717:
+mov byte ptr [02753F00],00
+
+0041076F:
+mov byte ptr [02753F00],01
+
+[DISABLE]
+
+/*
+004106F6:
+je 00410720
+
+00410710:
+mov byte ptr [02714099],01
+
+00410717:
+mov byte ptr [02753F00],01
+*/
+
+004106F8:
+mov byte ptr [02714099],01
+
+004106FF:
+mov byte ptr [02753F00],01
+
+00410706:
+jmp 00410796
+
+0041070B:
+mov byte ptr [esp+13],01
+
+00410710:
+mov byte ptr [02714099],01
+
+00410717:
+mov byte ptr [02753F00],01
+
+0041076F:
+mov byte ptr [02753F00],00
+</AssemblerScript>
+    </CheatEntry>
+    <CheatEntry>
+      <ID>1006</ID>
+      <Description>"Stop Vehicle"</Description>
+      <ShowAsSigned>0</ShowAsSigned>
+      <VariableType>Byte</VariableType>
+      <Address>"Need for Speed The Run.exe"+026858B0</Address>
+      <Offsets>
+        <Offset>AEB</Offset>
+        <Offset>8</Offset>
+        <Offset>14C</Offset>
+        <Offset>D0</Offset>
+        <Offset>38</Offset>
+        <Offset>88</Offset>
+      </Offsets>
+    </CheatEntry>
+    <CheatEntry>
+      <ID>1010</ID>
+      <Description>"CarHasBeenReset"</Description>
+      <ShowAsSigned>0</ShowAsSigned>
+      <VariableType>Byte</VariableType>
+      <Address>"Need for Speed The Run.exe"+026858B0</Address>
+      <Offsets>
+        <Offset>AE2</Offset>
+        <Offset>8</Offset>
+        <Offset>14C</Offset>
+        <Offset>D0</Offset>
+        <Offset>38</Offset>
+        <Offset>88</Offset>
+      </Offsets>
+    </CheatEntry>
+    <CheatEntry>
+      <ID>1014</ID>
+      <Description>"IsInGameCutsceneWreckedWastedSequence"</Description>
+      <ShowAsSigned>0</ShowAsSigned>
+      <VariableType>4 Bytes</VariableType>
+      <Address>02790098</Address>
+    </CheatEntry>
+    <CheatEntry>
+      <ID>1019</ID>
+      <Description>"IsInGameCutsceneCopTakedownMenu"</Description>
+      <VariableType>4 Bytes</VariableType>
+      <Address>"Need For Speed The Run.exe"+2353F00</Address>
+    </CheatEntry>
+  </CheatEntries>
+  <UserdefinedSymbols>
+    <SymbolEntry>
+      <Name>max</Name>
+      <Address>0043214B</Address>
+    </SymbolEntry>
+  </UserdefinedSymbols>
+</CheatTable>
